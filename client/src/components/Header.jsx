@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import logo from "../assets/FinalLogo.png";
+import logo from "../assets/finalLogo.png";
 import Navbar from "./Navbar";
 import { assets } from "../assets/data";
 import { useClerk, UserButton } from "@clerk/clerk-react";

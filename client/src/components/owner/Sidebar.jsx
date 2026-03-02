@@ -3,7 +3,7 @@ import { useAppContext } from "../../context/AppContext";
 import { assets } from "../../assets/data";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { UserButton } from "@clerk/clerk-react";
-import logo from "../../assets/FinalLogo.png";
+import logo from "../../assets/finalLogo.png";
 
 const Sidebar = () => {
   const { navigate, isOwner, user } = useAppContext();
