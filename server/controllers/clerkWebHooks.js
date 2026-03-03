@@ -11,16 +11,19 @@ const clerkWebhooks = async (req, res) => {
       "svix-signature": req.headers["svix-signature"],
     };
 
-    await whook.verify(JSON.stringify(req.body), headers);
+    // ✅ Convertir le Buffer en string pour la vérification
+    const payload = req.body.toString()
+    await whook.verify(payload, headers);
 
-    const { data, type } = req.body;
+    // ✅ Parser le JSON après la vérification
+    const { data, type } = JSON.parse(payload);
 
     switch (type) {
       case "user.created": {
         const userData = {
           clerkId: data.id,
           name: `${data.first_name} ${data.last_name}`,
-          email: data.email_addresses[0].email_address,
+          email: data.email_addresses[0]?.email_address || "",
           image: data.image_url,
           role: "student",
         };
@@ -34,7 +37,7 @@ const clerkWebhooks = async (req, res) => {
           { clerkId: data.id },
           {
             name: `${data.first_name} ${data.last_name}`,
-            email: data.email_addresses[0].email_address,
+            email: data.email_addresses[0]?.email_address || "",
             image: data.image_url,
           },
           { new: true }
