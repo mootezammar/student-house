@@ -8,15 +8,18 @@ import clerkWebhooks from "./controllers/clerkWebHooks.js"
 await connectDB()
 
 const app = express()
+
+// Middleware
 app.use(cors())
 app.use(clerkMiddleware())
 
-// ✅ AVANT express.json()
+// ⚠️ Webhook AVANT express.json()
 app.post("/api/clerk", express.raw({ type: "application/json" }), clerkWebhooks)
 
-// ✅ APRÈS le webhook
+// APRÈS webhook
 app.use(express.json())
 
+// Route check
 app.get('/', (req, res) => {
   res.json({ success: true, message: "API works successfully" })
 })

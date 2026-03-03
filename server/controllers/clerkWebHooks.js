@@ -1,7 +1,10 @@
 import { Webhook } from "svix";
 import User from "../models/User.js";
+import connectDB from "../config/mongodb.js";
 
 const clerkWebhooks = async (req, res) => {
+  await connectDB();
+  
   try {
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
@@ -16,7 +19,6 @@ const clerkWebhooks = async (req, res) => {
 
     const { data, type } = JSON.parse(payload);
 
-    // ✅ Helper pour récupérer l'email
     const getEmail = (data) =>
       data.email_addresses[0]?.email_address ||
       data.external_accounts[0]?.email_address ||
