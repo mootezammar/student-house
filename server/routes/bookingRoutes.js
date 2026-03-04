@@ -1,5 +1,5 @@
 import express from "express";
-import { requireAuth } from "@clerk/express";
+import { protect, isOwner } from "../middleware/authMiddleware.js";
 import {
   createBooking,
   getMyBookings,
@@ -12,15 +12,13 @@ import {
 const router = express.Router();
 
 // Student
-router.post("/", requireAuth(), createBooking);
-router.get("/my", requireAuth(), getMyBookings);
-router.patch("/cancel/:id", requireAuth(), cancelBooking);
+router.post("/", protect, createBooking);
+router.get("/my", protect, getMyBookings);
+router.patch("/cancel/:id", protect, cancelBooking);
+router.post("/stripe", protect, createStripeSession);
 
 // Owner
-router.get("/agency", requireAuth(), getAgencyBookings);
-router.patch("/pay/:id", requireAuth(), markAsPaid);
-
-// Stripe session
-router.post("/stripe", requireAuth(), createStripeSession);
+router.get("/agency", isOwner, getAgencyBookings);
+router.patch("/pay/:id", isOwner, markAsPaid);
 
 export default router;

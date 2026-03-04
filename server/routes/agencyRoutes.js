@@ -1,5 +1,5 @@
 import express from "express";
-import { requireAuth } from "@clerk/express";
+import { protect, isOwner } from "../middleware/authMiddleware.js";
 import {
   registerAgency,
   getMyAgency,
@@ -9,12 +9,12 @@ import {
 
 const agencyRouter = express.Router();
 
-// Public
-agencyRouter.get("/:id", getAgencyById);
+// ✅ Routes spécifiques AVANT /:id
+agencyRouter.post("/register", protect, registerAgency);
+agencyRouter.get("/my", protect, getMyAgency);
+agencyRouter.put("/update", isOwner, updateAgency);
 
-// Protected
-agencyRouter.post("/register", requireAuth(), registerAgency);
-agencyRouter.get("/my/agency", requireAuth(), getMyAgency);
-agencyRouter.put("/my/agency", requireAuth(), updateAgency);
+// ✅ Route dynamique EN DERNIER
+agencyRouter.get("/:id", getAgencyById);
 
 export default agencyRouter;
