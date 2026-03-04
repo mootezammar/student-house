@@ -7,6 +7,12 @@ import clerkWebhooks from "./controllers/clerkWebHooks.js";
 import userRoutes from "./routes/userRoute.js";
 import agencyRoutes from "./routes/agencyRoutes.js";
 import propertyRoutes from "./routes/propertyRoutes.js"
+import bookingRoutes from "./routes/bookingRoutes.js"
+import { stripeWebhook } from "./controllers/bookingController.js"
+
+
+
+
 await connectDB();
 
 const app = express();
@@ -15,12 +21,15 @@ const app = express();
 app.use(cors());
 app.use(clerkMiddleware());
 
+
+
 // ⚠️ Webhook AVANT express.json()
 app.post(
   "/api/clerk",
   express.raw({ type: "application/json" }),
   clerkWebhooks,
 );
+app.post("/api/bookings/webhook", express.raw({ type: "application/json" }), stripeWebhook)
 
 // APRÈS webhook
 app.use(express.json());
@@ -29,6 +38,8 @@ app.use(express.json());
 app.use("/api/user", userRoutes);
 app.use("/api/agency", agencyRoutes);
 app.use("/api/properties", propertyRoutes)
+app.use("/api/bookings", bookingRoutes)
+
 
 // Route check
 app.get("/", (req, res) => {

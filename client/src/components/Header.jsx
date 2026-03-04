@@ -5,7 +5,7 @@ import Navbar from "./Navbar";
 import { assets } from "../assets/data";
 import { useClerk, UserButton } from "@clerk/clerk-react";
 import { useAppContext } from "../context/AppContext";
-
+import { useAuth } from "@clerk/clerk-react";
 const BookingIcon = () => (
   <img
     src={assets.booking}
@@ -17,6 +17,16 @@ const BookingIcon = () => (
 );
 
 const Header = () => {
+ const { getToken } = useAuth();
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const token = await getToken();
+      console.log("TOKEN:", token);
+    };
+    fetchToken();
+  }, []);
+
   const [active, setActive] = useState(false);
   const [menuOpened, setMenuOpened] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
