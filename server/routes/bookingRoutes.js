@@ -12,7 +12,7 @@ import {
 const router = express.Router();
 
 // Student
-router.post("/",  createBooking);
+router.post("/", requireAuth(), createBooking);
 router.get("/my", requireAuth(), getMyBookings);
 router.patch("/cancel/:id", requireAuth(), cancelBooking);
 
