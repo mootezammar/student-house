@@ -4,7 +4,9 @@ import "dotenv/config";
 import { clerkMiddleware } from "@clerk/express";
 import connectDB from "./config/mongodb.js";
 import clerkWebhooks from "./controllers/clerkWebHooks.js";
-
+import userRoutes from "./routes/userRoute.js";
+import agencyRoutes from "./routes/agencyRoutes.js";
+import propertyRoutes from "./routes/propertyRoutes.js"
 await connectDB();
 
 const app = express();
@@ -22,6 +24,11 @@ app.post(
 
 // APRÈS webhook
 app.use(express.json());
+
+//definir api routes
+app.use("/api/user", userRoutes);
+app.use("/api/agency", agencyRoutes);
+app.use("/api/properties", propertyRoutes)
 
 // Route check
 app.get("/", (req, res) => {
