@@ -1,5 +1,5 @@
 import express from "express";
-import { requireAuth } from "@clerk/express";
+import { protect } from "../middleware/authMiddleware.js";
 import {
   getUser,
   updateUserRole,
@@ -7,11 +7,11 @@ import {
   addRecentCity,
 } from "../controllers/userController.js";
 
-const userRouter = express.Router();
+const router = express.Router();
 
-userRouter.get("/", requireAuth(), getUser);
-userRouter.put("/role", requireAuth(), updateUserRole);
-userRouter.post("/save-property", requireAuth(), toggleSaveProperty);
-userRouter.post("/recent-city", requireAuth(), addRecentCity);
+router.get("/", protect, getUser);
+router.put("/role", protect, updateUserRole);
+router.post("/save-property", protect, toggleSaveProperty);
+router.post("/recent-city", protect, addRecentCity);
 
-export default userRouter;
+export default router;

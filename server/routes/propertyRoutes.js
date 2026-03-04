@@ -1,5 +1,5 @@
 import express from "express";
-import { requireAuth } from "@clerk/express";
+import { isOwner } from "../middleware/authMiddleware.js";
 import { upload } from "../config/cloudinary.js";
 import {
   getProperties,
@@ -12,14 +12,11 @@ import {
 
 const router = express.Router();
 
-// Public
 router.get("/", getProperties);
-router.get("/my", requireAuth(), getMyProperties);
+router.get("/my", isOwner, getMyProperties);
 router.get("/:id", getPropertyById);
-
-// Protected — owner only
-router.post("/", requireAuth(), upload.array("images", 4), addProperty);
-router.patch("/toggle/:id", requireAuth(), toggleAvailability);
-router.delete("/:id", requireAuth(), deleteProperty);
+router.post("/", isOwner, upload.array("images", 4), addProperty);
+router.patch("/toggle/:id", isOwner, toggleAvailability);
+router.delete("/:id", isOwner, deleteProperty);
 
 export default router;
