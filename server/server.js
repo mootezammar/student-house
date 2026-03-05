@@ -8,6 +8,7 @@ import userRoutes from "./routes/userRoute.js";
 import agencyRoutes from "./routes/agencyRoutes.js";
 import propertyRoutes from "./routes/propertyRoutes.js"
 import bookingRoutes from "./routes/bookingRoutes.js"
+import binomeRoutes from "./routes/binomeRoutes.js";
 import { stripeWebhook } from "./controllers/bookingController.js"
 
 
@@ -39,6 +40,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/agency", agencyRoutes);
 app.use("/api/properties", propertyRoutes)
 app.use("/api/bookings", bookingRoutes)
+app.use("/api/binomes", binomeRoutes);
 
 
 // Route check
