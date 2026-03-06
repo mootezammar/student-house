@@ -18,9 +18,32 @@ export const protect = async (req, res, next) => {
 
     if (!payload) return res.json({ success: false, message: "Unauthorized" });
 
-    const userId = payload.sub;
-    const user = await User.findOne({ clerkId: userId });
-    if (!user) return res.json({ success: false, message: "User not found" });
+    const clerkId = payload.sub;
+
+    // ── Chercher ou créer l'user automatiquement
+    let user = await User.findOne({ clerkId });
+
+    if (!user) {
+      // Extraire les infos depuis le token Clerk
+      const email =
+        payload.email_address ||
+        payload.email ||
+        (payload.primary_email_address_id
+          ? `${clerkId}@clerk.user`
+          : `${clerkId}@clerk.user`);
+
+      const firstName = payload.first_name || payload.given_name || "";
+      const lastName = payload.last_name || payload.family_name || "";
+      const image = payload.image_url || payload.profile_image_url || "";
+
+      user = await User.create({
+        clerkId,
+        name: `${firstName} ${lastName}`.trim() || "Student",
+        email,
+        image,
+        role: "student",
+      });
+    }
 
     req.user = user;
     next();
@@ -45,9 +68,31 @@ export const isOwner = async (req, res, next) => {
 
     if (!payload) return res.json({ success: false, message: "Unauthorized" });
 
-    const userId = payload.sub;
-    const user = await User.findOne({ clerkId: userId });
-    if (!user) return res.json({ success: false, message: "User not found" });
+    const clerkId = payload.sub;
+
+    // ── Chercher ou créer l'user automatiquement
+    let user = await User.findOne({ clerkId });
+
+    if (!user) {
+      const email =
+        payload.email_address ||
+        payload.email ||
+        (payload.primary_email_address_id
+          ? `${clerkId}@clerk.user`
+          : `${clerkId}@clerk.user`);
+
+      const firstName = payload.first_name || payload.given_name || "";
+      const lastName = payload.last_name || payload.family_name || "";
+      const image = payload.image_url || payload.profile_image_url || "";
+
+      user = await User.create({
+        clerkId,
+        name: `${firstName} ${lastName}`.trim() || "Student",
+        email,
+        image,
+        role: "student",
+      });
+    }
 
     if (user.role !== "owner") {
       return res.json({ success: false, message: "Access denied — Owner only" });
