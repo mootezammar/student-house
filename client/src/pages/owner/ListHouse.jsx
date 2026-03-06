@@ -1,16 +1,61 @@
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../../context/AppContext";
-import { dummyProperties } from "../../assets/data";
+import toast from "react-hot-toast";
 
 const ListHouse = () => {
-  const { currency } = useAppContext();
+  const { currency, getAxios } = useAppContext();
   const [properties, setProperties] = useState([]);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
+  const [loading, setLoading] = useState(true);
+
+  // ── Fetch my properties
+  const fetchProperties = async () => {
+    try {
+      const ax = await getAxios();
+      const { data } = await ax.get("/api/properties/my");
+      if (data.success) setProperties(data.properties);
+    } catch (error) {
+      toast.error("Failed to load properties");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setProperties(dummyProperties);
+    fetchProperties();
   }, []);
+
+  // ── Toggle availability
+  const toggleAvailability = async (id) => {
+    try {
+      const ax = await getAxios();
+      const { data } = await ax.patch(`/api/properties/toggle/${id}`);
+      if (data.success) {
+        setProperties((prev) =>
+          prev.map((p) => p._id === id ? { ...p, isAvailable: !p.isAvailable } : p)
+        );
+        toast.success("Availability updated!");
+      }
+    } catch (error) {
+      toast.error("Failed to update availability");
+    }
+  };
+
+  // ── Delete property
+  const deleteProperty = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this property?")) return;
+    try {
+      const ax = await getAxios();
+      const { data } = await ax.delete(`/api/properties/${id}`);
+      if (data.success) {
+        setProperties((prev) => prev.filter((p) => p._id !== id));
+        toast.success("Property deleted!");
+      }
+    } catch (error) {
+      toast.error("Failed to delete property");
+    }
+  };
 
   const filtered = properties
     .filter((p) =>
@@ -22,20 +67,6 @@ const ListHouse = () => {
       (filterStatus === "Available" && p.isAvailable) ||
       (filterStatus === "Unavailable" && !p.isAvailable)
     );
-
-  const toggleAvailability = (id) => {
-    setProperties((prev) =>
-      prev.map((p) =>
-        p._id === id ? { ...p, isAvailable: !p.isAvailable } : p
-      )
-    );
-  };
-
-  const deleteProperty = (id) => {
-    if (window.confirm("Are you sure you want to delete this property?")) {
-      setProperties((prev) => prev.filter((p) => p._id !== id));
-    }
-  };
 
   return (
     <div className="flex-1 md:px-8 py-6 m-1 sm:m-3 h-[97vh] overflow-y-scroll bg-white shadow-sm ring-1 ring-slate-900/5 rounded-xl">
@@ -60,9 +91,7 @@ const ListHouse = () => {
             className="bg-transparent outline-none regular-14 h-10 w-full placeholder:text-gray-300"
           />
           {search && (
-            <button onClick={() => setSearch("")} className="text-gray-300 hover:text-gray-500 text-xs">
-              ✕
-            </button>
+            <button onClick={() => setSearch("")} className="text-gray-300 hover:text-gray-500 text-xs">✕</button>
           )}
         </div>
         <div className="flex gap-2">
@@ -75,14 +104,12 @@ const ListHouse = () => {
                   ? "bg-secondary text-white"
                   : "bg-secondary/5 text-gray-500 hover:bg-secondary/10"
               }`}
-            >
-              {status}
-            </button>
+            >{status}</button>
           ))}
         </div>
       </div>
 
-      {/* Stats row */}
+      {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="bg-secondary/5 rounded-xl p-3 text-center">
           <p className="bold-18 text-secondary">{properties.length}</p>
@@ -100,8 +127,6 @@ const ListHouse = () => {
 
       {/* Table */}
       <div className="rounded-xl overflow-hidden ring-1 ring-slate-900/5">
-
-        {/* Table header */}
         <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_1fr] px-4 py-3 bg-secondary">
           <p className="h5 text-white">Property</p>
           <p className="h5 text-white">Type</p>
@@ -110,16 +135,14 @@ const ListHouse = () => {
           <p className="h5 text-white">Actions</p>
         </div>
 
-        {/* Rows */}
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flexCenter py-16 text-gray-400 regular-14">Loading...</div>
+        ) : filtered.length === 0 ? (
           <div className="flexCenter flex-col gap-3 py-16 text-gray-400 bg-white">
             <p className="text-4xl">🏠</p>
             <p className="medium-14">No properties found</p>
             {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="text-secondary text-sm hover:underline"
-              >
+              <button onClick={() => setSearch("")} className="text-secondary text-sm hover:underline">
                 Clear search
               </button>
             )}
@@ -135,7 +158,7 @@ const ListHouse = () => {
               {/* Property */}
               <div className="flex items-center gap-3 w-full sm:w-auto">
                 <img
-                  src={property.images[0]}
+                  src={property.images?.[0] || "https://via.placeholder.com/56x48?text=No+Image"}
                   alt={property.title}
                   className="w-14 h-12 object-cover rounded-lg shrink-0"
                 />
@@ -187,11 +210,9 @@ const ListHouse = () => {
                   Delete
                 </button>
               </div>
-
             </div>
           ))
         )}
-
       </div>
     </div>
   );

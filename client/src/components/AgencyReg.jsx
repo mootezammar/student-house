@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { assets, cities } from "../assets/data";
+import toast from "react-hot-toast";
 
 const AgencyReg = () => {
-  const { setShowAgencyReg } = useAppContext();
+  const { setShowAgencyReg, getAxios, getUserData, setIsOwner } = useAppContext();
 
   const [form, setForm] = useState({
     name: "",
@@ -14,6 +15,7 @@ const AgencyReg = () => {
   });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -32,10 +34,28 @@ const AgencyReg = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    setSubmitted(true);
+
+    try {
+      setLoading(true);
+      const ax = await getAxios();
+      const { data } = await ax.post("/api/agency/register", form);
+
+      if (data.success) {
+        setSubmitted(true);
+        await getUserData(); // ← refresh user data
+        setIsOwner(true);   // ← set owner
+        toast.success("Agency registered successfully!");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputClass = (field) =>
@@ -158,13 +178,13 @@ const AgencyReg = () => {
 
               <button
                 type="submit"
+                disabled={loading}
                 className="btn-dark py-2.5 rounded-lg w-full medium-14"
               >
-                Register Agency
+                {loading ? "Registering..." : "Register Agency"}
               </button>
             </>
           ) : (
-            // Success state
             <div className="flexCenter flex-col gap-4 py-10 text-center h-full">
               <div className="w-16 h-16 bg-green-100 rounded-full flexCenter text-3xl">
                 ✅
@@ -172,7 +192,6 @@ const AgencyReg = () => {
               <h4 className="h4 text-green-600">Agency Registered!</h4>
               <p className="regular-14 text-gray-400">
                 <span className="font-semibold text-gray-600">{form.name}</span> has been successfully registered.
-                We'll contact you at <span className="text-secondary">{form.email}</span>.
               </p>
               <button
                 type="button"

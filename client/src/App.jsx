@@ -15,6 +15,8 @@ import Sidebar from "./components/owner/Sidebar";
 import Dashboard from "./pages/owner/Dashboard";
 import AddHouse from "./pages/owner/AddHouse";
 import ListHouse from "./pages/owner/ListHouse";
+import BinomeDetails from "./pages/BinomeDetails";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   const { showAgencyReg, setShowAgencyReg } = useAppContext();
@@ -22,6 +24,7 @@ const App = () => {
   const isOwnerPath = location.pathname.includes("owner");
   return (
     <main>
+      <Toaster position="top-right" />
       {!isOwnerPath && <Header />}
       {showAgencyReg && <AgencyReg />}
       <Routes>
@@ -29,6 +32,7 @@ const App = () => {
         <Route path="/listing" element={<Listing />} />
         <Route path="/listing/:id" element={<HouseDetails />} />
         <Route path="/binome" element={<Binome />} />
+        <Route path="/binome/:id" element={<BinomeDetails />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/my-bookings" element={<MyBooking />} />
 

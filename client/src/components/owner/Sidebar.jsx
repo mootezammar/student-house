@@ -6,56 +6,68 @@ import { UserButton } from "@clerk/clerk-react";
 import logo from "../../assets/finalLogo.png";
 
 const Sidebar = () => {
-  const { navigate, isOwner, user } = useAppContext();
+  const { navigate, isOwner, user, loading } = useAppContext();
 
   const navItems = [
-    { path: "/owner", label: "Dashboard", icon: assets.dashboard },
-    { path: "/owner/add-house", label: "Add House", icon: assets.housePlus },
-    { path: "/owner/list-house", label: "List House", icon: assets.list },
+    { path: "/owner", label: "Dashboard", icon: assets.dashboard, emoji: "📊" },
+    { path: "/owner/add-house", label: "Add House", icon: assets.housePlus, emoji: "➕" },
+    { path: "/owner/list-house", label: "List House", icon: assets.list, emoji: "🏠" },
   ];
 
   useEffect(() => {
-    if (!isOwner) navigate("/");
-  }, [isOwner]);
+    if (!loading && !isOwner) navigate("/");
+  }, [isOwner, loading]);
+
+  if (loading) return (
+    <div className="flexCenter min-h-screen">
+      <p className="regular-14 text-gray-400">Loading...</p>
+    </div>
+  );
 
   return (
     <div className="bg-linear-to-r from-[#eefbff] to-white min-h-screen">
       <div className="mx-auto max-w-[1440px] flex flex-col md:flex-row">
+
         {/* Sidebar */}
-        <div className="max-md:flex max-md:items-center max-md:justify-between flex-col justify-between bg-white sm:m-3 md:min-w-[220px] md:min-h-[97vh] rounded-xl shadow-sm ring-1 ring-slate-900/5">
-          <div className="flex flex-col gap-y-6 max-md:items-center md:flex-col md:pt-5 w-full">
-            {/* Logo & Mobile profile */}
+        <div className="max-md:flex max-md:items-center max-md:justify-between flex-col justify-between bg-white sm:m-3 md:min-w-[240px] md:min-h-[97vh] rounded-2xl shadow-sm ring-1 ring-slate-900/5">
+          <div className="flex flex-col gap-y-5 max-md:items-center md:flex-col md:pt-6 w-full">
+
+            {/* Logo */}
             <div className="w-full flex justify-between md:flex-col">
-              <div className="flex flex-1 p-3 lg:pl-8">
+              <div className="flex flex-1 p-3 lg:pl-7">
                 <Link to="/owner">
                   <img src={logo} alt="logo" className="h-19" />
                 </Link>
               </div>
-
               {/* Mobile user */}
               <div className="md:hidden flex items-center gap-3 p-3 pr-4">
-                <UserButton
-                  appearance={{
-                    elements: {
-                      userButtonAvatarBox: { width: "38px", height: "38px" },
-                    },
-                  }}
-                />
+                <UserButton appearance={{ elements: { userButtonAvatarBox: { width: "36px", height: "36px" } } }} />
                 <span className="text-sm font-semibold text-gray-800 capitalize">
                   {user?.firstName} {user?.lastName}
                 </span>
               </div>
             </div>
 
-            {/* Nav label */}
-            <div className="hidden md:block px-8 mb-[-16px]">
-              <p className="regular-12 text-gray-400 uppercase tracking-widest">
-                Menu
-              </p>
+            {/* Agency badge */}
+            <div className="hidden md:flex items-center gap-2 mx-4 px-4 py-2.5 bg-secondary/5 rounded-xl ring-1 ring-secondary/10">
+              <div className="w-8 h-8 bg-secondary/10 rounded-lg flexCenter shrink-0">
+                <span className="text-base">🏢</span>
+              </div>
+              <div>
+                <p className="regular-11 text-gray-400 uppercase tracking-widest">Agency Panel</p>
+                <p className="medium-13 text-secondary capitalize">
+                  {user?.firstName} {user?.lastName}
+                </p>
+              </div>
+            </div>
+
+            {/* Menu label */}
+            <div className="hidden md:block px-7 mb-[-10px]">
+              <p className="regular-11 text-gray-400 uppercase tracking-widest">Navigation</p>
             </div>
 
             {/* Nav items */}
-            <nav className="flex md:flex-col md:gap-1 gap-x-1 w-full px-3">
+            <nav className="flex md:flex-col md:gap-1.5 gap-x-1 w-full px-3">
               {navItems.map((link) => (
                 <NavLink
                   key={link.label}
@@ -63,36 +75,50 @@ const Sidebar = () => {
                   end={link.path === "/owner"}
                   className={({ isActive }) =>
                     isActive
-                      ? "flex items-center gap-x-3 px-5 py-2.5 bold-13 cursor-pointer rounded-xl bg-secondary/10 text-secondary max-md:border-b-4 md:border-l-4 border-secondary"
-                      : "flex items-center gap-x-3 px-5 py-2.5 bold-13 cursor-pointer rounded-xl text-gray-500 hover:bg-secondary/5 hover:text-secondary transition-all"
+                      ? "flex items-center gap-x-3 px-4 py-3 medium-13 cursor-pointer rounded-xl bg-secondary text-white shadow-sm max-md:border-b-4 md:border-l-0 border-secondary"
+                      : "flex items-center gap-x-3 px-4 py-3 medium-13 cursor-pointer rounded-xl text-gray-500 hover:bg-secondary/5 hover:text-secondary transition-all duration-200"
                   }
                 >
-                  <img
-                    src={link.icon}
-                    alt={link.label}
-                    className="hidden md:block shrink-0"
-                    width={18}
-                  />
-                  <span>{link.label}</span>
+                  {({ isActive }) => (
+                    <>
+                      <div className={`w-8 h-8 rounded-lg flexCenter shrink-0 transition-all ${
+                        isActive ? "bg-white/20" : "bg-secondary/8"
+                      }`}>
+                        <img src={link.icon} alt={link.label} width={16}
+                          className={`hidden md:block ${isActive ? "brightness-0 invert" : ""}`} />
+                        <span className="md:hidden text-sm">{link.emoji}</span>
+                      </div>
+                      <span>{link.label}</span>
+                    </>
+                  )}
                 </NavLink>
               ))}
             </nav>
           </div>
 
-          {/* Desktop user */}
-          <div className="hidden md:flex items-center gap-3 bg-primary border-t border-slate-900/10 rounded-b-xl p-4 mt-76 pl-6 lg:pl-8">
-            <UserButton
-              appearance={{
-                elements: {
-                  userButtonAvatarBox: { width: "42px", height: "42px" },
-                },
-              }}
-            />
-            <div>
-              <p className="text-sm font-semibold text-gray-800 capitalize leading-tight">
-                {user?.firstName} {user?.lastName}
-              </p>
-              <p className="regular-12 text-gray-400">Agency Owner</p>
+          {/* Bottom section */}
+          <div className="hidden md:flex flex-col gap-2 px-3 pb-4 mt-4">
+
+            {/* Back to Home */}
+            <Link
+              to="/"
+              className="flex items-center gap-x-3 px-4 py-3 medium-13 cursor-pointer rounded-xl text-gray-400 hover:bg-orange-50 hover:text-orange-400 transition-all duration-200 border border-dashed border-slate-900/10 hover:border-orange-200"
+            >
+              <div className="w-8 h-8 bg-gray-100 rounded-lg flexCenter shrink-0 group-hover:bg-orange-100">
+                <span className="text-sm">🏡</span>
+              </div>
+              <span>Back to Home</span>
+            </Link>
+
+            {/* User info */}
+            <div className="flex items-center gap-3 bg-secondary/5 ring-1 ring-slate-900/5 rounded-xl p-3 mt-1">
+              <UserButton appearance={{ elements: { userButtonAvatarBox: { width: "40px", height: "40px" } } }} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-800 capitalize leading-tight truncate">
+                  {user?.firstName} {user?.lastName}
+                </p>
+                <p className="regular-11 text-secondary">Agency Owner</p>
+              </div>
             </div>
           </div>
         </div>

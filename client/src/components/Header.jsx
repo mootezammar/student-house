@@ -17,16 +17,7 @@ const BookingIcon = () => (
 );
 
 const Header = () => {
- const { getToken } = useAuth();
-
- useEffect(() => {
-  const fetchToken = async () => {
-    const token = await getToken();
-    console.log("TOKEN:", token);
-  };
-  fetchToken();
-}, []);
-
+ 
   const [active, setActive] = useState(false);
   const [menuOpened, setMenuOpened] = useState(false);
   const [showSearch, setShowSearch] = useState(false);

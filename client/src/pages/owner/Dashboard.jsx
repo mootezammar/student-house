@@ -1,17 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../../context/AppContext";
-import { assets, dummyDashboardData } from "../../assets/data";
+import { assets } from "../../assets/data";
+import toast from "react-hot-toast";
 
 const Dashboard = () => {
-  const { user, currency } = useAppContext();
+  const { user, currency, getAxios } = useAppContext();
   const [dashboardData, setDashboardData] = useState({
     bookings: [],
     totalBookings: 0,
     totalRevenue: 0,
   });
+  const [loading, setLoading] = useState(true);
+
+  const fetchDashboard = async () => {
+    try {
+      const ax = await getAxios();
+      const { data } = await ax.get("/api/bookings/agency");
+      if (data.success) {
+        setDashboardData({
+          bookings: data.bookings,
+          totalBookings: data.bookings.length,
+          totalRevenue: data.totalRevenue,
+        });
+      }
+    } catch (error) {
+      toast.error("Failed to load dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setDashboardData(dummyDashboardData);
+    if (user) fetchDashboard();
   }, [user]);
 
   return (
@@ -65,15 +85,19 @@ const Dashboard = () => {
             <p className="h5 text-white">Status</p>
           </div>
 
-          {/* Table rows */}
-          {dashboardData.bookings.length === 0 ? (
+          {/* Loading */}
+          {loading ? (
+            <div className="flexCenter py-16 text-gray-400 regular-14">
+              Loading...
+            </div>
+          ) : dashboardData.bookings.length === 0 ? (
             <div className="flexCenter py-16 text-gray-400 regular-14">
               No bookings yet
             </div>
           ) : (
-            dashboardData.bookings.map((booking, index) => (
+            dashboardData.bookings.slice(0, 5).map((booking, index) => (
               <div
-                key={index}
+                key={booking._id}
                 className={`flex flex-col sm:grid sm:grid-cols-[0.4fr_2fr_2fr_1fr_1fr] items-center gap-3 px-6 py-4 border-b border-slate-900/5 hover:bg-secondary/5 transition-colors ${
                   index % 2 === 0 ? "bg-white" : "bg-slate-50/50"
                 }`}
@@ -86,7 +110,7 @@ const Dashboard = () => {
                 {/* Property */}
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                   <img
-                    src={booking.property.images[0]}
+                    src={booking.property.images?.[0] || "https://via.placeholder.com/56x48?text=No+Image"}
                     alt={booking.property.title}
                     className="w-14 h-12 object-cover rounded-lg shrink-0"
                   />
@@ -99,7 +123,9 @@ const Dashboard = () => {
                   <p className="regular-13">
                     {new Date(booking.checkInDate).toLocaleDateString()}
                   </p>
-                  <p className="regular-12 text-gray-400">→ {new Date(booking.checkOutDate).toLocaleDateString()}</p>
+                  <p className="regular-12 text-gray-400">
+                    → {new Date(booking.checkOutDate).toLocaleDateString()}
+                  </p>
                 </div>
 
                 {/* Amount */}
@@ -127,7 +153,6 @@ const Dashboard = () => {
               </div>
             ))
           )}
-
         </div>
       </div>
     </div>

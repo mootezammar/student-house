@@ -4,15 +4,16 @@ import { assets } from "../assets/data";
 import { useAppContext } from "../context/AppContext";
 
 const FacilityBadge = ({ icon, alt, value, bordered = true }) => (
-  <p className={`flexCenter gap-x-1 medium-13 ${bordered ? "border-r border-slate-900/20 pr-3" : ""}`}>
+  <p
+    className={`flexCenter gap-x-1 medium-13 ${bordered ? "border-r border-slate-900/20 pr-3" : ""}`}
+  >
     <img src={icon} alt={alt} width={16} />
     {value}
   </p>
 );
 
-
 const Item = ({ property }) => {
-  const {currency}=useAppContext()
+  const { currency } = useAppContext();
   return (
     <Link
       to={`/listing/${property._id}`}
@@ -22,7 +23,10 @@ const Item = ({ property }) => {
       {/* Image */}
       <div className="relative overflow-hidden rounded-t-xl">
         <img
-          src={property.images[0]}
+          src={
+            property.images[0] ||
+            "https://via.placeholder.com/400x300?text=No+Image"
+          }
           alt={property.title}
           className="h-52 w-full object-cover hover:scale-105 transition-transform duration-500"
         />
@@ -39,7 +43,6 @@ const Item = ({ property }) => {
 
       {/* Info */}
       <div className="p-4">
-
         {/* Title */}
         <h4 className="h5 line-clamp-1 mb-1">{property.title}</h4>
 
@@ -51,9 +54,22 @@ const Item = ({ property }) => {
 
         {/* Facilities */}
         <div className="flex items-center gap-2 py-2 border-t border-slate-900/5">
-          <FacilityBadge icon={assets.bed}   alt="bedrooms"  value={`${property.facilities.bedrooms} Bed`}  />
-          <FacilityBadge icon={assets.bath}  alt="bathrooms" value={`${property.facilities.bathrooms} Bath`} />
-          <FacilityBadge icon={assets.ruler} alt="area"      value={property.area} bordered={false} />
+          <FacilityBadge
+            icon={assets.bed}
+            alt="bedrooms"
+            value={`${property.facilities.bedrooms} Bed`}
+          />
+          <FacilityBadge
+            icon={assets.bath}
+            alt="bathrooms"
+            value={`${property.facilities.bathrooms} Bath`}
+          />
+          <FacilityBadge
+            icon={assets.ruler}
+            alt="area"
+            value={property.area}
+            bordered={false}
+          />
         </div>
 
         {/* Description */}
@@ -62,9 +78,10 @@ const Item = ({ property }) => {
         {/* CTA */}
         <div className="flexBetween mt-4 pt-3 border-t border-slate-900/5">
           <span className="regular-13 text-gray-400">Available now</span>
-          <span className="medium-13 text-secondary hover:underline">View details →</span>
+          <span className="medium-13 text-secondary hover:underline">
+            View details →
+          </span>
         </div>
-
       </div>
     </Link>
   );

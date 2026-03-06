@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useAppContext } from "../context/AppContext";
+import { cities as staticCities, dummyProperties } from "../assets/data";
 import Item from "../components/Item";
 
 const Listing = () => {
@@ -14,18 +15,12 @@ const Listing = () => {
 
   const sortOptions = ["Relevant", "Low to High", "High to Low"];
   const houseType = ["s+0", "s+1", "s+2", "s+3", "s+4", "s+5+"];
-  const priceRange = [
-    "0 to 200",
-    "200 to 400",
-    "400 to 800",
-    "800 to 1200",
-    "1200 +",
-  ];
+  const priceRange = ["0 to 200", "200 to 400", "400 to 800", "800 to 1200", "1200 +"];
 
-  // Extract all unique schools from all properties
+  // ── Écoles depuis dummyProperties (statique)
   const allSchools = useMemo(() => {
     const schools = [];
-    properties.forEach((p) => {
+    dummyProperties.forEach((p) => {
       p.nearbyEducation?.forEach((edu) => {
         if (!schools.find((s) => s.name === edu.name)) {
           schools.push({ name: edu.name, type: edu.type });
@@ -33,34 +28,28 @@ const Listing = () => {
       });
     });
     return schools.sort((a, b) => a.name.localeCompare(b.name));
-  }, [properties]);
+  }, []);
 
   const filteredSchools = useMemo(() => {
     if (!schoolSearch) return allSchools;
     return allSchools.filter((s) =>
-      s.name.toLowerCase().includes(schoolSearch.toLowerCase()),
+      s.name.toLowerCase().includes(schoolSearch.toLowerCase())
     );
   }, [allSchools, schoolSearch]);
 
-  const cities = useMemo(() => {
-    return [...new Set(properties.map((p) => p.city))].sort();
-  }, [properties]);
+  // ── Villes statiques
+  const cities = staticCities;
 
   const toggleFilter = (value, setState) => {
     setState((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value],
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
     );
   };
 
   const filteredProperties = useMemo(() => {
     return properties
-      .filter(
-        (p) =>
-          selectedTypes.length === 0 || selectedTypes.includes(p.propertyType),
-      )
-      .filter(
-        (p) => selectedCities.length === 0 || selectedCities.includes(p.city),
-      )
+      .filter((p) => selectedTypes.length === 0 || selectedTypes.includes(p.propertyType))
+      .filter((p) => selectedCities.length === 0 || selectedCities.includes(p.city))
       .filter((p) => {
         if (selectedPrices.length === 0) return true;
         const price = p.price.rent;
@@ -82,14 +71,7 @@ const Listing = () => {
         if (sortBy === "High to Low") return b.price.rent - a.price.rent;
         return 0;
       });
-  }, [
-    properties,
-    selectedTypes,
-    selectedCities,
-    selectedPrices,
-    selectedSchool,
-    sortBy,
-  ]);
+  }, [properties, selectedTypes, selectedCities, selectedPrices, selectedSchool, sortBy]);
 
   const hasActiveFilters =
     selectedTypes.length > 0 ||
@@ -107,7 +89,6 @@ const Listing = () => {
     setSortBy("Relevant");
   };
 
-  // Badge color per education type
   const typeColor = {
     Université: "bg-blue-100 text-blue-700",
     ISET: "bg-green-100 text-green-700",
@@ -117,23 +98,12 @@ const Listing = () => {
     "École Privée": "bg-yellow-100 text-yellow-700",
   };
 
-  const FilterSection = ({
-    title,
-    items,
-    selected,
-    onToggle,
-    scrollable = false,
-  }) => (
+  const FilterSection = ({ title, items, selected, onToggle, scrollable = false }) => (
     <div className="py-3 border-t border-slate-900/10">
       <h5 className="h5 mb-3">{title}</h5>
-      <div
-        className={`flex flex-col gap-2 ${scrollable ? "max-h-44 overflow-y-auto pr-1" : ""}`}
-      >
+      <div className={`flex flex-col gap-2 ${scrollable ? "max-h-44 overflow-y-auto pr-1" : ""}`}>
         {items.map((item) => (
-          <label
-            key={item}
-            className="flex items-center gap-2 medium-14 cursor-pointer hover:text-secondary transition-colors"
-          >
+          <label key={item} className="flex items-center gap-2 medium-14 cursor-pointer hover:text-secondary transition-colors">
             <input
               type="checkbox"
               checked={selected.includes(item)}
@@ -150,8 +120,10 @@ const Listing = () => {
   return (
     <div className="bg-linear-to-r from-[#eefbff] to-white py-28">
       <div className="max-padd-container flex flex-col sm:flex-row gap-8 mb-16">
-        {/* Left side - Filters */}
+
+        {/* Left - Filters */}
         <div className="bg-secondary/10 ring-1 ring-slate-900/5 p-4 sm:min-w-64 sm:h-fit rounded-xl">
+
           {/* Sort */}
           <div className="py-3">
             <h5 className="h5 mb-3">Sort By</h5>
@@ -161,18 +133,14 @@ const Listing = () => {
               className="bg-white border border-slate-900/10 outline-none medium-14 h-9 w-full rounded-lg px-2 cursor-pointer"
             >
               {sortOptions.map((sort) => (
-                <option value={sort} key={sort}>
-                  {sort}
-                </option>
+                <option value={sort} key={sort}>{sort}</option>
               ))}
             </select>
           </div>
 
-          {/* 🎓 Search by School Name */}
+          {/* Near My School */}
           <div className="py-3 border-t border-slate-900/10">
             <h5 className="h5 mb-3">🎓 Near My School</h5>
-
-            {/* Search input */}
             <input
               type="text"
               placeholder="Search school..."
@@ -180,50 +148,28 @@ const Listing = () => {
               onChange={(e) => setSchoolSearch(e.target.value)}
               className="bg-white border border-slate-900/10 outline-none medium-13 h-9 w-full rounded-lg px-3 mb-2 placeholder:text-gray-300"
             />
-
-            {/* Selected school badge */}
             {selectedSchool && (
               <div className="flex items-center justify-between bg-secondary/10 px-3 py-2 rounded-lg mb-2">
-                <span className="medium-13 text-secondary line-clamp-1">
-                  {selectedSchool}
-                </span>
+                <span className="medium-13 text-secondary line-clamp-1">{selectedSchool}</span>
                 <button
-                  onClick={() => {
-                    setSelectedSchool(null);
-                    setSchoolSearch("");
-                  }}
+                  onClick={() => { setSelectedSchool(null); setSchoolSearch(""); }}
                   className="text-red-400 hover:text-red-600 ml-2 shrink-0 font-bold"
-                >
-                  ×
-                </button>
+                >×</button>
               </div>
             )}
-
-            {/* School list */}
             <div className="flex flex-col gap-1 max-h-52 overflow-y-auto pr-1">
               {filteredSchools.map((school) => (
                 <button
                   key={school.name}
-                  onClick={() => {
-                    setSelectedSchool(
-                      selectedSchool === school.name ? null : school.name,
-                    );
-                    setSchoolSearch("");
-                  }}
+                  onClick={() => { setSelectedSchool(selectedSchool === school.name ? null : school.name); setSchoolSearch(""); }}
                   className={`text-left px-3 py-2 rounded-lg transition-all duration-200 medium-13 ${
-                    selectedSchool === school.name
-                      ? "bg-secondary text-white"
-                      : "bg-white hover:bg-secondary/10"
+                    selectedSchool === school.name ? "bg-secondary text-white" : "bg-white hover:bg-secondary/10"
                   }`}
                 >
                   <span className="block line-clamp-1">{school.name}</span>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full mt-0.5 inline-block ${
-                      selectedSchool === school.name
-                        ? "bg-white/20 text-white"
-                        : typeColor[school.type] || "bg-gray-100 text-gray-600"
-                    }`}
-                  >
+                  <span className={`text-xs px-2 py-0.5 rounded-full mt-0.5 inline-block ${
+                    selectedSchool === school.name ? "bg-white/20 text-white" : typeColor[school.type] || "bg-gray-100 text-gray-600"
+                  }`}>
                     {school.type}
                   </span>
                 </button>
@@ -253,78 +199,47 @@ const Listing = () => {
 
           {/* Price Range */}
           <FilterSection
-            title="💰 Price (DT/night)"
+            title="💰 Price (DT/mo)"
             items={priceRange.map((p) => `${p} DT`)}
             selected={selectedPrices.map((p) => `${p} DT`)}
-            onToggle={(v) =>
-              toggleFilter(v.replace(" DT", ""), setSelectedPrices)
-            }
+            onToggle={(v) => toggleFilter(v.replace(" DT", ""), setSelectedPrices)}
           />
 
-          {/* Clear Filters */}
           {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="mt-4 w-full btn-outline text-center text-sm"
-            >
+            <button onClick={clearFilters} className="mt-4 w-full btn-outline text-center text-sm">
               Clear Filters
             </button>
           )}
         </div>
 
-        {/* Right side - Results */}
+        {/* Right - Results */}
         <div className="flex-1">
-          {/* Active filters tags */}
           {hasActiveFilters && (
             <div className="flex flex-wrap gap-2 mb-4">
               {selectedSchool && (
                 <span className="flexCenter gap-1 bg-secondary text-white medium-13 px-3 py-1 rounded-full">
                   🎓 {selectedSchool}
-                  <button
-                    onClick={() => setSelectedSchool(null)}
-                    className="ml-1 hover:text-red-200"
-                  >
-                    ×
-                  </button>
+                  <button onClick={() => setSelectedSchool(null)} className="ml-1 hover:text-red-200">×</button>
                 </span>
               )}
               {selectedCities.map((city) => (
-                <span
-                  key={city}
-                  className="flexCenter gap-1 bg-secondary/10 text-secondary medium-13 px-3 py-1 rounded-full"
-                >
+                <span key={city} className="flexCenter gap-1 bg-secondary/10 text-secondary medium-13 px-3 py-1 rounded-full">
                   🏙️ {city}
-                  <button
-                    onClick={() => toggleFilter(city, setSelectedCities)}
-                    className="ml-1 hover:text-red-400"
-                  >
-                    ×
-                  </button>
+                  <button onClick={() => toggleFilter(city, setSelectedCities)} className="ml-1 hover:text-red-400">×</button>
                 </span>
               ))}
               {selectedTypes.map((type) => (
-                <span
-                  key={type}
-                  className="flexCenter gap-1 bg-secondary/10 text-secondary medium-13 px-3 py-1 rounded-full"
-                >
+                <span key={type} className="flexCenter gap-1 bg-secondary/10 text-secondary medium-13 px-3 py-1 rounded-full">
                   🏠 {type}
-                  <button
-                    onClick={() => toggleFilter(type, setSelectedTypes)}
-                    className="ml-1 hover:text-red-400"
-                  >
-                    ×
-                  </button>
+                  <button onClick={() => toggleFilter(type, setSelectedTypes)} className="ml-1 hover:text-red-400">×</button>
                 </span>
               ))}
             </div>
           )}
 
-          <p className="medium-14 text-gray-50 mb-4">
-            {filteredProperties.length} propert
-            {filteredProperties.length !== 1 ? "ies" : "y"} found
-            {selectedSchool && (
-              <span className="text-secondary ml-1">near {selectedSchool}</span>
-            )}
+          <p className="medium-14 text-gray-500 mb-4">
+            {filteredProperties.length} propert{filteredProperties.length !== 1 ? "ies" : "y"} found
+            {selectedSchool && <span className="text-secondary ml-1">near {selectedSchool}</span>}
           </p>
 
           {filteredProperties.length > 0 ? (
@@ -334,14 +249,10 @@ const Listing = () => {
               ))}
             </div>
           ) : (
-            <div className="flexCenter flex-col gap-3 min-h-[40vh] text-gray-50">
-              <p className="medium-16">No properties found near this school.</p>
-              <button
-                onClick={clearFilters}
-                className="btn-secondary text-white"
-              >
-                Clear Filters
-              </button>
+            <div className="flexCenter flex-col gap-3 min-h-[40vh] text-gray-400">
+              <p className="text-5xl">🏠</p>
+              <p className="medium-16">No properties found</p>
+              <button onClick={clearFilters} className="btn-secondary text-white">Clear Filters</button>
             </div>
           )}
         </div>
