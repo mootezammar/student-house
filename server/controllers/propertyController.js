@@ -10,7 +10,7 @@ export const getProperties = async (req, res) => {
   try {
     const { city, propertyType, minPrice, maxPrice } = req.query;
 
-    const filter = { isAvailable: true };
+    const filter = { isAvailable: true, isBinome: { $ne: true } }; // ← exclure binomes
     if (city && city !== "All") filter.city = city;
     if (propertyType && propertyType !== "All") filter.propertyType = propertyType;
     if (minPrice || maxPrice) {
@@ -56,25 +56,27 @@ export const addProperty = async (req, res) => {
     const {
       title, description, address, city, country,
       propertyType, rent, bedrooms, bathrooms,
-      garages, area, amenities, nearbyEducation, coordinates,
+      garages, area, amenities, nearbyEducation, coordinates, isBinome,
     } = req.body;
 
     // Upload images to cloudinary
     const imageUrls = [];
-if (req.files && req.files.length > 0) {
-  for (const file of req.files) {
-    const result = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { folder: "student-house/properties" },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      ).end(file.buffer);
-    });
-    imageUrls.push(result.secure_url);
-  }
-}
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { folder: "student-house/properties" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          ).end(file.buffer);
+        });
+        imageUrls.push(result.secure_url);
+      }
+    }
+
+    const isBinomeProperty = isBinome === "true" || isBinome === true;
 
     const property = await Property.create({
       agency: agency._id,
@@ -95,6 +97,8 @@ if (req.files && req.files.length > 0) {
       nearbyEducation: nearbyEducation ? JSON.parse(nearbyEducation) : [],
       coordinates: coordinates ? JSON.parse(coordinates) : {},
       images: imageUrls,
+      isAvailable: isBinomeProperty ? false : true, // ← binome = non disponible dans listing
+      isBinome: isBinomeProperty,                   // ← marquer comme binome
     });
 
     // Add property to agency
@@ -116,8 +120,11 @@ export const getMyProperties = async (req, res) => {
     const user = await User.findOne({ clerkId: userId });
     if (!user) return res.json({ success: false, message: "User not found" });
 
-    const properties = await Property.find({ agency: user.agency })
-      .sort({ createdAt: -1 });
+    // ← exclure les propriétés binome de la liste owner
+    const properties = await Property.find({
+      agency: user.agency,
+      isBinome: { $ne: true }
+    }).sort({ createdAt: -1 });
 
     res.json({ success: true, properties });
   } catch (error) {
@@ -162,7 +169,6 @@ export const deleteProperty = async (req, res) => {
 
     await Property.findByIdAndDelete(id);
 
-    // Remove from agency
     await Agency.findByIdAndUpdate(user.agency, {
       $pull: { properties: id },
     });
