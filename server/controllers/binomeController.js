@@ -9,7 +9,10 @@ export const createBinome = async (req, res) => {
     const user = req.user;
 
     if (user.binome) {
-      return res.json({ success: false, message: "You already have a binome post" });
+      return res.json({
+        success: false,
+        message: "You already have a binome post",
+      });
     }
 
     const {
@@ -80,7 +83,8 @@ export const getMyBinome = async (req, res) => {
       .populate("property", "title address city propertyType price images")
       .populate("student", "name image");
 
-    if (!binome) return res.json({ success: false, message: "No binome post found" });
+    if (!binome)
+      return res.json({ success: false, message: "No binome post found" });
 
     res.json({ success: true, binome });
   } catch (error) {
@@ -119,10 +123,11 @@ export const updateBinome = async (req, res) => {
         contact,
         phone,
       },
-      { new: true }
+      { new: true },
     );
 
-    if (!binome) return res.json({ success: false, message: "Binome not found" });
+    if (!binome)
+      return res.json({ success: false, message: "Binome not found" });
 
     res.json({ success: true, binome });
   } catch (error) {
@@ -140,6 +145,25 @@ export const deleteBinome = async (req, res) => {
     await User.findByIdAndUpdate(user._id, { binome: null });
 
     res.json({ success: true, message: "Binome post deleted" });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const getBinomeById = async (req, res) => {
+  await connectDB();
+  try {
+    const binome = await Binome.findById(req.params.id)
+      .populate(
+        "property",
+        "title address city propertyType price images facilities amenities area",
+      )
+      .populate("student", "name image");
+
+    if (!binome)
+      return res.json({ success: false, message: "Binome not found" });
+
+    res.json({ success: true, binome });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }

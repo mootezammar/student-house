@@ -6,6 +6,7 @@ import {
   getMyBinome,
   updateBinome,
   deleteBinome,
+  getBinomeById,
 } from "../controllers/binomeController.js";
 
 const router = express.Router();
@@ -16,6 +17,7 @@ router.get("/", getBinomes);
 // Protected
 router.post("/", protect, createBinome);
 router.get("/my", protect, getMyBinome);
+router.get("/:id", getBinomeById);
 router.put("/my", protect, updateBinome);
 router.delete("/my", protect, deleteBinome);
 
