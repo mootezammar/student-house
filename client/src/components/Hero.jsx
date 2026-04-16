@@ -34,61 +34,7 @@ const Hero = () => {
             </h2>
           </div>
 
-          {/* Search Form */}
-          <form className="bg-white text-gray-500 rounded-xl px-6 py-5 flex flex-col lg:flex-row gap-4 lg:gap-x-6 w-full ring-1 ring-slate-900/10 shadow-md">
-            
-            <FormField icon={assets.pin} iconAlt="location" label="Destination" htmlFor="destinationInput">
-              <input
-                className={inputClass}
-                list="destinations"
-                id="destinationInput"
-                type="text"
-                placeholder="Where are you going?"
-                required
-              />
-              <datalist id="destinations">
-                {cities.map((city, index) => (
-                  <option value={city} key={index} />
-                ))}
-              </datalist>
-            </FormField>
-
-            <FormField icon={assets.calendar} iconAlt="calendar" label="Check in" htmlFor="checkIn">
-              <input
-                type="date"
-                id="checkIn"
-                className={inputClass}
-              />
-            </FormField>
-
-            <FormField icon={assets.calendar} iconAlt="calendar" label="Check out" htmlFor="checkOut">
-              <input
-                type="date"
-                id="checkOut"
-                className={inputClass}
-              />
-            </FormField>
-
-            <FormField icon={assets.user} iconAlt="guests" label="Roommates" htmlFor="guests">
-              <input
-                type="number"
-                id="guests"
-                min={1}
-                max={10}
-                placeholder="0"
-                className={inputClass}
-              />
-            </FormField>
-
-            <button
-              type="submit"
-              className="btn-dark flexCenter gap-2 lg:self-end lg:mb-0 rounded-xl py-2.5 px-8 max-md:w-full"
-            >
-              <img src={assets.search} alt="search" className="invert" width={18} />
-              <span className="medium-14">Search</span>
-            </button>
-
-          </form>
+         
         </div>
       </div>
     </section>
